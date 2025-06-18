@@ -57,8 +57,81 @@ func IdentifyContact(c *gin.Context) {
 		return
 	}
 
-	// We'll handle this logic later in step 6
-	c.JSON(http.StatusOK, gin.H{"msg": "Found existing contacts, merge logic coming next"})
+	// Step 1: Build map of all related contacts (email or phone matches)
+	var allContacts []models.Contact
+	email := deref(req.Email)
+	phone := deref(req.PhoneNumber)
+
+	database.DB.
+		Where("email = ? OR phone_number = ?", email, phone).
+		Order("created_at asc").
+		Find(&allContacts)
+
+	// Step 2: Determine primary contact
+	primary := allContacts[0]
+	if primary.LinkPrecedence == "secondary" && primary.LinkedID != nil {
+		var actualPrimary models.Contact
+		database.DB.First(&actualPrimary, *primary.LinkedID)
+		primary = actualPrimary
+	}
+
+	// Step 3: See if new info exists (not already stored)
+	alreadyExists := false
+	for _, c := range allContacts {
+		if c.Email == email && c.PhoneNumber == phone {
+			alreadyExists = true
+			break
+		}
+	}
+
+	// Step 4: If new combo, create secondary contact
+	if !alreadyExists {
+		newContact := models.Contact{
+			Email:          email,
+			PhoneNumber:    phone,
+			LinkedID:       &primary.ID,
+			LinkPrecedence: "secondary",
+			CreatedAt:      time.Now(),
+			UpdatedAt:      time.Now(),
+		}
+		database.DB.Create(&newContact)
+		allContacts = append(allContacts, newContact)
+	}
+
+	// Step 5: Format response
+	emails := map[string]bool{}
+	phones := map[string]bool{}
+	secondaryIDs := []uint{}
+
+	for _, c := range allContacts {
+		if c.ID == primary.ID {
+			emails[c.Email] = true
+			phones[c.PhoneNumber] = true
+			continue
+		}
+		if c.Email != "" {
+			emails[c.Email] = true
+		}
+		if c.PhoneNumber != "" {
+			phones[c.PhoneNumber] = true
+		}
+		if c.LinkPrecedence == "secondary" {
+			secondaryIDs = append(secondaryIDs, c.ID)
+		}
+	}
+
+	resp := IdentifyResponse{}
+	resp.Contact.PrimaryContactId = primary.ID
+	for e := range emails {
+		resp.Contact.Emails = append(resp.Contact.Emails, e)
+	}
+	for p := range phones {
+		resp.Contact.PhoneNumbers = append(resp.Contact.PhoneNumbers, p)
+	}
+	resp.Contact.SecondaryContactIds = secondaryIDs
+
+	c.JSON(http.StatusOK, resp)
+
 }
 
 func deref(s *string) string {
