@@ -41,8 +41,8 @@ func IdentifyContact(c *gin.Context) {
 			Email:          deref(req.Email),
 			PhoneNumber:    deref(req.PhoneNumber),
 			LinkPrecedence: "primary",
-			CreatedAt:      time.Now(),
-			UpdatedAt:      time.Now(),
+			CreatedAt:      time.Now().UTC(),
+			UpdatedAt:      time.Now().UTC(),
 		}
 
 		database.DB.Create(&newContact)
@@ -91,7 +91,7 @@ func IdentifyContact(c *gin.Context) {
 			database.DB.Model(&other).Updates(models.Contact{
 				LinkedID:       &mainPrimary.ID,
 				LinkPrecedence: "secondary",
-				UpdatedAt:      time.Now(),
+				UpdatedAt:      time.Now().UTC(),
 			})
 		}
 		primary = mainPrimary
@@ -113,8 +113,8 @@ func IdentifyContact(c *gin.Context) {
 			PhoneNumber:    phone,
 			LinkedID:       &primary.ID,
 			LinkPrecedence: "secondary",
-			CreatedAt:      time.Now(),
-			UpdatedAt:      time.Now(),
+			CreatedAt:      time.Now().UTC(),
+			UpdatedAt:      time.Now().UTC(),
 		}
 		database.DB.Create(&newContact)
 		allContacts = append(allContacts, newContact)
