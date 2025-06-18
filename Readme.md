@@ -1,4 +1,4 @@
-# 🔍 Bitespeed Identity Reconciliation API
+# 🔍 Identity Reconciliation API
 
 > FluxKart’s time-traveling customer tracker, built in GoLang ⚙️🚀
 
