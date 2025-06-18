@@ -1,4 +1,4 @@
-# 🧠 Bitespeed Identity Reconciliation – GoLang Backend
+# 🧠 Identity Reconciliation – GoLang Backend
 
 This project solves the **Identity Reconciliation** problem for [Bitespeed](https://www.bitespeed.co/). The goal is to identify and link users who may use different contact information (email/phone) across multiple orders on FluxKart.com.
 
