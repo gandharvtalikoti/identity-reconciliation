@@ -75,6 +75,28 @@ func IdentifyContact(c *gin.Context) {
 		primary = actualPrimary
 	}
 
+	// Step 2b: If multiple primaries exist, merge them
+	primaryContacts := []models.Contact{}
+	for _, c := range allContacts {
+		if c.LinkPrecedence == "primary" {
+			primaryContacts = append(primaryContacts, c)
+		}
+	}
+
+	// If multiple primaries exist, merge under the oldest one
+	if len(primaryContacts) > 1 {
+		mainPrimary := primaryContacts[0]
+		for _, other := range primaryContacts[1:] {
+			// Downgrade to secondary
+			database.DB.Model(&other).Updates(models.Contact{
+				LinkedID:       &mainPrimary.ID,
+				LinkPrecedence: "secondary",
+				UpdatedAt:      time.Now(),
+			})
+		}
+		primary = mainPrimary
+	}
+
 	// Step 3: See if new info exists (not already stored)
 	alreadyExists := false
 	for _, c := range allContacts {
