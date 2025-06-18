@@ -1,33 +1,20 @@
-# 🔍 Identity Reconciliation API
+# 🧠 Bitespeed Identity Reconciliation – GoLang Backend
 
-> FluxKart’s time-traveling customer tracker, built in GoLang ⚙️🚀
+This project solves the **Identity Reconciliation** problem for [Bitespeed](https://www.bitespeed.co/). The goal is to identify and link users who may use different contact information (email/phone) across multiple orders on FluxKart.com.
 
----
+## 🚀 Hosted API
 
-## 🎯 Problem Statement
+🔗 **Live URL**: [https://identity-reconciliation-r68x.onrender.com](https://identity-reconciliation-r68x.onrender.com)
 
-FluxKart shoppers use different emails/phones across orders. Bitespeed’s backend must reconcile contacts with common phone or email, and return a unified identity response.
+## 📬 API Endpoint
 
----
+### `POST /identify`
 
-## 📌 Tech Stack
+Identifies and links user contacts by email and/or phone number.
 
-- ✅ Golang
-- ✅ Gin Web Framework
-- ✅ PostgreSQL
-- ✅ GORM ORM
-- ✅ Hosted on Render.com
-
----
-
-## 🧪 API: `/identify`
-
-**POST** `/identify`
-
-### 📥 Request Body
-
+#### 🔧 Request Body (JSON)
 ```json
 {
-  "email": "test@flux.com",
+  "email": "user@example.com",
   "phoneNumber": "1234567890"
 }
